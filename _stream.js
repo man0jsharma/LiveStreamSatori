@@ -13,9 +13,7 @@ var RTM = require("satori-rtm-sdk");
 //RTM.logger.DEBUG = true;
 var express = require('express');
 var cors = require('cors');
-
 var path = require('path'); //Code module so don't need to install.
-
 var app = express();
 var stream = require("stream");
 var chalk = require("chalk");
@@ -44,22 +42,21 @@ var convertTime = (unix_timestamp) => {
   return formattedTime;
 }
 
-
 var channel = rtm.subscribe('channel', RTM.SubscriptionMode.SIMPLE, {
   history: {
     count: 10
-  },//seconds
+  },
   filter: "select * from `Meetup-RSVP` where group.group_country = 'us'"
 });
 
 rtm.on('enter-connected', function () {
   //console.log(JSON.stringify(channel));
-  console.log('**************************************Connected to RTM!');
+  console.log('Connected to RTM!');
 });
 
 /* set callback for state transition */
 channel.on('enter-subscribed', function () {
-  console.log('**************************************Subscribed to: ' + channel.subscriptionId);
+  console.log('Subscribed to: ' + channel.subscriptionId);
 });
 
 /* set callback for PDU with specific action */
@@ -78,7 +75,7 @@ rtm.on("error", function (error) {
 /* set callback for all subscription PDUs */
 channel.on('data', function (pdu) {
   if (pdu.action.endsWith('/error')) {
-    console.log('**************************************Subscription is failed: ', pdu.body);
+    console.log('Subscription is failed: ', pdu.body);
   }
 });
 
@@ -97,21 +94,6 @@ ReadStreamAsync.prototype._read = function (n) {
   var self = this;
 
   channel.on('rtm/subscription/data', function (pdu) {
-    // pdu.body.messages.forEach(function (pdu) {
-    //   console.log(self._index);
-    //   var buf = new Buffer(JSON.stringify(pdu), 'ascii');
-    //   if (self._index > self._max) {
-    //     self.push(null);
-    //     rtm.unsubscribe(channel.subscriptionId);
-    //     self.rtmConnected = true;
-    //     rtm.stop();
-    //   }
-    //   else {
-        
-    //     self._index++;
-    //     self.push(buf);
-    //   }
-    // });
     var buf = new Buffer(JSON.stringify(pdu.body.messages), 'ascii');
     self.push(buf);
     self.push(null);
@@ -130,8 +112,6 @@ var server = http.createServer(
       {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin" : "*",
-        // "Access-Control-Allow-Methods" : 'OPTIONS, GET',
-        // "Access-Control-Allow-Headers" : "*"
       }
     );
 
